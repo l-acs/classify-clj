@@ -160,20 +160,22 @@
 
 ;; (tree :loanworthy samples :rid)
 
-;; {:salary 
-;;     ([:>50k true]
-;;      [:>20k {:age 
-;;                 ([:<25 false] [:>25 true])}]
-;;      [:<20k false])}
+(def expected1
+  {:salary 
+      '([:>50k true]
+        [:>20k {:age 
+                   ([:<25 false] [:>25 true])}]
+        [:<20k false])})
 
 ;; (tree :repeat customers :rid)
-;;
-;; {:education 
-;; 	([:college {:age 
-;;			([:20-30 true] 
-;;			 [:31-40 true] 
-;;			 [:51-60 false]
-;;			 [:41-50 true])}] 
-;;	 [:graduate true]
-;;	 [:high-school false])}
+
+(def expected2
+  {:education 
+    '([:college {:age 
+                      ([:20-30 true] 
+                       [:31-40 true] 
+                       [:51-60 false]
+                       [:41-50 true])}] 
+      [:graduate true]
+      [:high-school false])})
 
