@@ -1,3 +1,6 @@
+(ns classify-clj.data
+  (:gen-class))
+
 (def sample1
 { :rid 1
   :married false

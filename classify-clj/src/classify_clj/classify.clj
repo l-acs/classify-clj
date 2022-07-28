@@ -2,6 +2,9 @@
 ;; Copyright 2022 Luc Sahar. MIT License.
 ;; For Advanced DB Management, Florida International Univerisity
 
+(ns classify-clj.classify
+  (:gen-class))
+
 (defn log2 [n]
    (/ (Math/log n) (Math/log 2)))
 
