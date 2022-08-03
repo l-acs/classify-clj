@@ -22,7 +22,7 @@
       (distinct (map attribute data)))
 
 (defn only-this [attribute trait data]
-   (filter #(= (attribute %) trait) data))
+   (filter #(= (get % attribute) trait) data))
 
 (defn partitioner [attribute data]
    (let [options (possibilities attribute data)]
@@ -173,21 +173,51 @@
                  (possibilities classifier) extract-if-one)])
      (partitioner gain data)))
 
+(defn apply-if-seq [kv f & args]
+  (if-not (seq? (second kv))
+    kv
+    [(first kv)
+     (apply f args)]))
 
 (defn tree [classifier data & ignores]
   (let [best-gain (apply determine-best-gain classifier data ignores)
         value-class-pairings (pair-values-and-classes classifier data best-gain)]
     {best-gain
-     (map (fn [pairing] 
-             (if (seq? (second pairing))
-              ;; then we have to recurse
-               [(first pairing)
-                (apply tree 
-                      classifier 
-                      (only-this best-gain (first pairing) data)
-                      best-gain ;; also ignore what we've already split on
-                      ignores)]
-	      ;; otherwise we return our result
-              pairing)) 
-           value-class-pairings)}))
+     (map 
+      #(apply-if-seq
+        %
+        tree classifier  ; we continue to classify
+        (only-this best-gain (first %) data) ;  recursing on the matching data, e.g. only the ones whose :education is :college
+
+        best-gain ;; and now we also add :education to the list of
+                  ;; attributes we can't use to classify the data
+        ignores)
+      value-class-pairings)}))
+
+;; (defn tree [classifier data & ignores]
+;;   (let [best-gain (apply determine-best-gain classifier data ignores)
+;;         value-class-pairings (pair-values-and-classes classifier data best-gain)]
+;;     {best-gain
+;;      (map (fn [pairing] ;; for every pairing
+;;             (if-not (seq? (second pairing)) ;; if it only corresponds to one possible value for our classifier
+;;               pairing ;; then we return it
+;;               ;; otherwise we have to recurse
+;;               (let [only-matching-data (only-this best-gain (first pairing) data)] ;; we only consider the data that have that value for that attribute (e.g., the customers whose :education is :college)
+;;                 [(first pairing) ;; when the value for the best gain
+;;                                  ;; attribute corresponds to this
+;;                                  ;; value (say :education
+;;                                  ;; and :college)
+                 
+;;                 (apply tree classifier  ; we continue to classify recursing on the matching data
+;;                       only-matching-data
+;;                       best-gain ;; and now we also add :education to
+;;                                 ;; the list of attributes we ignore
+;;                                 ;; when determining the attribute with
+;;                                 ;; the best gain
+;;                       ignores)]))) 
+;;            value-class-pairings)}))
+
+
+
+
 
